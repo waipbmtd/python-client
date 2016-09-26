@@ -53,13 +53,13 @@ if sys.argv[-1] == 'publish':
 
 
 setup(
-    name='coreapi',
+    name='coreapi-devin',
     version=version,
-    url='https://github.com/core-api/python-client',
+    url='https://github.com/waipbmtd/python-client',
     license='BSD',
     description='Python client library for Core API.',
     author='Tom Christie',
-    author_email='tom@tomchristie.com',
+    author_email='waipbmtd@gmail.com',
     packages=get_packages('coreapi'),
     package_data=get_package_data('coreapi'),
     install_requires=[

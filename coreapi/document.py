@@ -36,7 +36,8 @@ def _key_sorting(item):
 
 # The field class, as used by Link objects:
 
-Field = namedtuple('Field', ['name', 'required', 'location', 'type', 'description'])
+Field = namedtuple('Field', ['name', 'required', 'location', 'type',
+                             'description'])
 Field.__new__.__defaults__ = (False, '', '', '')
 
 
@@ -49,7 +50,7 @@ class Document(itypes.Dict):
     Expresses the data that the client may access,
     and the actions that the client may perform.
     """
-    def __init__(self, url=None, title=None, content=None):
+    def __init__(self, url=None, title=None, content=None, tags=[], definitions={}):
         content = {} if (content is None) else content
 
         if url is not None and not isinstance(url, string_types):
@@ -60,9 +61,19 @@ class Document(itypes.Dict):
             raise TypeError("'content' must be a dict.")
         if any([not isinstance(key, string_types) for key in content.keys()]):
             raise TypeError('content keys must be strings.')
+        if not isinstance(tags, list):
+            raise TypeError("'tags' must be a list.")
+        if any([not isinstance(tag, dict) for tag in tags]):
+            raise TypeError('tags keys must be dict.')
+        if not isinstance(definitions, dict):
+            raise TypeError("'definitions' must be a dict.")
+        if any([not isinstance(defin, dict) for defin in definitions.itervalues()]):
+            raise TypeError('defin keys must be dict.')
 
         self._url = '' if (url is None) else url
         self._title = '' if (title is None) else title
+        self._tags = [] if (tags is []) else tags
+        self._definitions = {} if (definitions is {}) else definitions
         self._data = {key: _to_immutable(value) for key, value in content.items()}
 
     def clone(self, data):
@@ -83,6 +94,8 @@ class Document(itypes.Dict):
             return (
                 self.url == other.url and
                 self.title == other.title and
+                self.tags == other.tags and
+                self.definitions == other.definitions and
                 self._data == other._data
             )
         return super(Document, self).__eq__(other)
@@ -108,6 +121,14 @@ class Document(itypes.Dict):
             (key, value) for key, value in self.items()
             if isinstance(value, Link)
         ])
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def definitions(self):
+        return self._definitions
 
 
 class Object(itypes.Dict):
@@ -163,7 +184,8 @@ class Link(itypes.Object):
     """
     Links represent the actions that a client may perform.
     """
-    def __init__(self, url=None, action=None, encoding=None, transform=None, description=None, fields=None):
+    def __init__(self, url=None, action=None, encoding=None, transform=None,
+                 description=None, fields=None, summary=None, responses={}):
         if (url is not None) and (not isinstance(url, string_types)):
             raise TypeError("Argument 'url' must be a string.")
         if (action is not None) and (not isinstance(action, string_types)):
@@ -174,6 +196,10 @@ class Link(itypes.Object):
             raise TypeError("Argument 'transform' must be a string.")
         if (description is not None) and (not isinstance(description, string_types)):
             raise TypeError("Argument 'description' must be a string.")
+        if (summary is not None) and (not isinstance(summary, string_types)):
+            raise TypeError("Argument 'summary' must be a string.")
+        if (responses is not None) and (not isinstance(responses, dict)):
+            raise TypeError("Argument 'responses' must be a dict.")
         if (fields is not None) and (not isinstance(fields, (list, tuple))):
             raise TypeError("Argument 'fields' must be a list.")
         if (fields is not None) and any([
@@ -187,6 +213,8 @@ class Link(itypes.Object):
         self._encoding = '' if (encoding is None) else encoding
         self._transform = '' if (transform is None) else transform
         self._description = '' if (description is None) else description
+        self._summary = '' if (summary is None) else summary
+        self._responses = {} if (responses is {}) else responses
         self._fields = () if (fields is None) else tuple([
             item if isinstance(item, Field) else Field(item, required=False, location='')
             for item in fields
@@ -213,6 +241,14 @@ class Link(itypes.Object):
         return self._description
 
     @property
+    def summary(self):
+        return self._summary
+
+    @property
+    def responses(self):
+        return self._responses
+
+    @property
     def fields(self):
         return self._fields
 
@@ -224,6 +260,8 @@ class Link(itypes.Object):
             self.encoding == other.encoding and
             self.transform == other.transform and
             self.description == other.description and
+            self.responses == other.responses and
+            self.summary == other.summary and
             set(self.fields) == set(other.fields)
         )
 
