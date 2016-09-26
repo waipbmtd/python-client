@@ -13,7 +13,7 @@ Python client library for [Core API][core-api].
 
 Install from PyPI, using pip:
 
-    $ pip install coreapi
+    $ pip install coreapi-devin
 
 ## Quickstart
 

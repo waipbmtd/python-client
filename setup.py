@@ -58,7 +58,7 @@ setup(
     url='https://github.com/waipbmtd/python-client',
     license='BSD',
     description='Python client library for Core API.',
-    author='Tom Christie',
+    author='Devin',
     author_email='waipbmtd@gmail.com',
     packages=get_packages('coreapi'),
     package_data=get_package_data('coreapi'),
